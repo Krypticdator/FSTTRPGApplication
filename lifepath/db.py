@@ -1,12 +1,11 @@
-from peewee import Model, ForeignKeyField, IntegerField, CharField, SqliteDatabase
+from peewee import ForeignKeyField, IntegerField, CharField
 
 from application.basicinfo.databases import DBManager as BasicInfoDBManager
 from application.characterloader.database import Actor, DBManager as ActorDBManager
+from application.common.database.masterdb import BaseModel
 
-lifepath_db = SqliteDatabase('lifepath.db')
 
-
-class Event(Model):
+class Event(BaseModel):
     actor = ForeignKeyField(Actor, related_name='event actors')
     age = IntegerField()
     event_chain = CharField()
@@ -37,11 +36,8 @@ class Event(Model):
         events = Event.select().where(Event.actor == act).order_by(Event.age)
         return events
 
-    class Meta:
-        database = lifepath_db
 
-
-class EventRelation(Model):
+class EventRelation(BaseModel):
     owner = ForeignKeyField(Actor, 'owners')
     relation = CharField()
     detail = CharField()
@@ -105,21 +101,16 @@ class EventRelation(Model):
         return EventRelation.select().where(EventRelation.owner == act, EventRelation.event == event,
                                             EventRelation.to_person == ep)
 
-    class Meta:
-        database = lifepath_db
-
-
 
 class DBManager(object):
     def __init__(self):
         self.actor_db_mgr = ActorDBManager()
         self.basic_info_mgr = BasicInfoDBManager()
-        lifepath_db.get_conn()
-        lifepath_db.create_tables([Event, EventRelation], safe=True)
+
+        self.conn = BaseModel.get_connection()
+        BaseModel.create_tables([Event, EventRelation])
+
 
         self.events = Event()
         self.relations = EventRelation()
 
-    def __del__(self):
-        if lifepath_db:
-            lifepath_db.close()

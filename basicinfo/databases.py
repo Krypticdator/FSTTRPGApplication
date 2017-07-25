@@ -2,28 +2,26 @@ from __future__ import print_function
 
 import os
 
-from peewee import Model, CharField, SqliteDatabase, IntegerField, ForeignKeyField
+from peewee import CharField, IntegerField, ForeignKeyField
 
 import utilities
 from application.characterloader.database import Actor, DBManager as ActorDBManager
+from application.common.database.masterdb import BaseModel
 
-
-def find_or_create(name, path):
+'''def find_or_create(name, path):
     for root, dirs, files in os.walk(path):
         if name in files:
             result = os.path.join(root, name)
             print('found db in: ' + str(result))
             return result
     print('didnt find any db, creating new: ' + name)
-    return name
+    return name'''
 
 
 current_dir = os.path.dirname(__file__)
-namedb = SqliteDatabase(find_or_create('names.db', current_dir))
-characterdb = SqliteDatabase(find_or_create('basic_info.db', current_dir))
 
 
-class Names(Model):
+class Names(BaseModel):
     name = CharField()
     country = CharField()
     group = CharField()
@@ -40,7 +38,7 @@ class Names(Model):
 
     @staticmethod
     def add_many(list_of_names):
-        with namedb.atomic():
+        with BaseModel.get_db().atomic():
             for index in range(0, len(list_of_names), 100):
                 print('adding indexes: ' + str(index) + " - " + str(index + 100))
                 Names.insert_many(list_of_names[index:index + 100]).execute()
@@ -59,11 +57,8 @@ class Names(Model):
         query = Names.delete().where(Names.country == country)
         return query
 
-    class Meta:
-        database = namedb
 
-
-class BasicInfo(Model):
+class BasicInfo(BaseModel):
     actor = ForeignKeyField(rel_model=Actor, related_name='basics')
     gender = CharField()
     country = CharField()
@@ -99,9 +94,6 @@ class BasicInfo(Model):
         print('birthday at load: ' + bi.birthday)
         return bi
 
-    class Meta:
-        database = characterdb
-
 
 class DBManager(object):
     def __init__(self):
@@ -110,14 +102,10 @@ class DBManager(object):
 
         # https://stackoverflow.com/questions/42964254/peewee-operational-error-in-flask-app
         # namedb.connect()
-        namedb.get_conn()
+        self.conn = BaseModel.get_connection()
         # characterdb.connect()
-        characterdb.get_conn()
 
-        namedb.create_tables([Names], True)
-        characterdb.create_tables([BasicInfo], True)
+        BaseModel.create_tables([Names, BasicInfo])
+
         self.names_table = Names()
         self.basic_info = BasicInfo()
-
-    def __del__(self):
-        namedb.close()

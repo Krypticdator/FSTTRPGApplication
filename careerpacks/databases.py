@@ -1,13 +1,7 @@
-from peewee import Model, SqliteDatabase, CharField, ForeignKeyField
+from peewee import CharField, ForeignKeyField
 
 from application.attributes.databases import AttributeBlueprint, DBManager as AttributeDBManager
-
-career_db = SqliteDatabase('careerpack.db')
-
-
-class BaseModel(Model):
-    class Meta:
-        database = career_db
+from application.common.database.masterdb import BaseModel
 
 
 class CareerPack(BaseModel):
@@ -43,13 +37,9 @@ class DBManager(object):
     def __init__(self):
         super(DBManager, self).__init__()
         self.attribute_db_mgr = AttributeDBManager()
-        career_db.connect()
-        career_db.create_tables(models=[CareerPack], safe=True)
+        self.conn = BaseModel.get_connection()
+        BaseModel.create_tables(models=[CareerPack], safe=True)
         self.career_packs = CareerPack()
-
-    def __del__(self):
-        if career_db:
-            career_db.close()
 
 
 if __name__ == '__main__':

@@ -1,18 +1,15 @@
-from peewee import Model, CharField, IntegerField, SqliteDatabase
+from peewee import CharField, IntegerField
 
-db = SqliteDatabase('fuziontables.db')
+from application.common.database.masterdb import BaseModel
 
 
-class FuzionTable(Model):
+class FuzionTable(BaseModel):
     identifier = CharField(unique=True)
     table = CharField()
     fr = IntegerField()
     to = IntegerField()
     re = CharField()
     leads_to_table = CharField(null=True)
-
-    class Meta:
-        database = db
 
     @staticmethod
     def count_options(table):
@@ -40,7 +37,7 @@ class FuzionTable(Model):
 
     @staticmethod
     def add_many(list_of_options):
-        with db.atomic():
+        with BaseModel.get_db().atomic():
             for index in range(0, len(list_of_options), 100):
                 FuzionTable.insert_many(list_of_options[index:index + 100]).execute()
 
@@ -53,9 +50,8 @@ class DBManager(object):
         super(DBManager, self).__init__()
         # https://stackoverflow.com/questions/42964254/peewee-operational-error-in-flask-app
         # db.connect()
-        db.get_conn()
-        db.create_tables([FuzionTable], True)
+        self.conn = BaseModel.get_connection()
+
+        BaseModel.create_tables([FuzionTable], True)
         self.fuzion_tables = FuzionTable()
 
-    def __del__(self):
-        db.close()

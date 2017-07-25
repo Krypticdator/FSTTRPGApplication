@@ -1,29 +1,8 @@
-import os
-
-from peewee import Model, SqliteDatabase, CharField, ForeignKeyField
+from peewee import CharField, ForeignKeyField
 
 from application.characterloader.database import DBManager as ActorDBManager, Actor
+from application.common.database.masterdb import BaseModel
 from application.tables.db import DBManager as TableManager
-
-
-def find_or_create(name, path):
-    for root, dirs, files in os.walk(path):
-        if name in files:
-            result = os.path.join(root, name)
-            print('found db in: ' + str(result))
-            return result
-    print('didnt find any db, creating new: ' + name)
-    return name
-
-
-current_dir = os.path.dirname(__file__)
-database_name = find_or_create('personalities.db', current_dir)
-personality_db = SqliteDatabase(database_name)
-
-
-class BaseModel(Model):
-    class Meta:
-        database = personality_db
 
 
 class CharacterPersonalityTrait(BaseModel):
@@ -112,10 +91,7 @@ class DBManager(object):
         super(DBManager, self).__init__()
         self.tables_db_mgr = TableManager()
         self.actors_db_mgr = ActorDBManager()
-        personality_db.connect()
-        personality_db.create_tables([Personality, CharacterPersonalityTrait], True)
-        self.personality_db = personality_db
+        self.con = BaseModel.get_connection()
+        BaseModel.create_tables([Personality, CharacterPersonalityTrait])
         self.personalities_table = Personality()
 
-    def __del__(self):
-        personality_db.close()

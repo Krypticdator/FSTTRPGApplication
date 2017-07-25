@@ -1,17 +1,11 @@
 from collections import namedtuple
 
-from peewee import Model, SqliteDatabase, CharField, IntegerField, BooleanField, ForeignKeyField, DoubleField, \
+from peewee import CharField, IntegerField, BooleanField, ForeignKeyField, DoubleField, \
     DoesNotExist
 
 import aws
 from application.characterloader.database import Actor, DBManager as ActorDBManager
-
-attributes_db = SqliteDatabase('attributes.db')
-
-
-class BaseModel(Model):
-    class Meta:
-        database = attributes_db
+from application.common.database.masterdb import BaseModel
 
 
 class AttributeBlueprint(BaseModel):
@@ -295,8 +289,8 @@ class Complication(BaseModel):
 class DBManager(object):
     def __init__(self):
         self.actor_db_mgr = ActorDBManager()
-        attributes_db.connect()
-        attributes_db.create_tables([AttributeBlueprint, Skill, SkillBlueprint, Attribute, Perk, Complication,
+        BaseModel.get_connection()
+        BaseModel.create_tables([AttributeBlueprint, Skill, SkillBlueprint, Attribute, Perk, Complication,
                                      CareerPack], safe=True)
 
         self.attribute_blueprints = AttributeBlueprint()
@@ -331,13 +325,6 @@ class DBManager(object):
                                                                  chip_lvl_cost=a['chip_lvl_cost'],
                                                                  chippable=chippable, diff=a['diff'],
                                                                  short=a['short'], stat=a['stat'])
-
-    def __del__(self):
-        try:
-            if attributes_db:
-                attributes_db.close()
-        except TypeError:
-            print('failed to close the database')
 
 
 if __name__ == '__main__':

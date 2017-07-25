@@ -1,11 +1,10 @@
-from peewee import Model, IntegerField, SqliteDatabase, ForeignKeyField
+from peewee import IntegerField, ForeignKeyField
 
 from application.basicinfo.databases import Actor, ActorDBManager
+from application.common.database.masterdb import BaseModel
 
-database = SqliteDatabase('stats.db')
 
-
-class PrimaryStats(Model):
+class PrimaryStats(BaseModel):
     actor = ForeignKeyField(Actor, 'primarystats')
     intelligence = IntegerField()
     reflexes = IntegerField()
@@ -54,17 +53,13 @@ class PrimaryStats(Model):
         act = Actor.add_or_get(role, name)
         return PrimaryStats.get(PrimaryStats.actor == act)
 
-    class Meta:
-        database = database
-
 
 class DBManager(object):
     def __init__(self):
         super(DBManager, self).__init__()
         self.actor_db_mgr = ActorDBManager()
-        database.connect()
-        database.create_tables([PrimaryStats], safe=True)
+        self.conn = BaseModel.get_connection()
+
+        BaseModel.create_tables([PrimaryStats], safe=True)
         self.table_primary_stats = PrimaryStats()
 
-    def __del__(self):
-        database.close()
