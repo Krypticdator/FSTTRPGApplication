@@ -131,7 +131,7 @@ class Enemy(EventPerson):
             self.who_is_mad = e.who_is_mad
             self.do = e.action
             self.resources = e.resources
-            self.name = e.enemytargets.name
+            self.name = ep_name
 
     view = View(
         VGroup(
@@ -746,7 +746,7 @@ class Lifepath(HasTraits):
 
     def load(self, actor_role, actor_name):
         db_mgr = DBManager()
-
+        self.events[:] = []
         # https://stackoverflow.com/questions/31815235/python-peewee-iterate-over-selectquery
         events = list(db_mgr.events.get_all_events_of_actor(actor_role, actor_name))
         if events is not None:
@@ -757,11 +757,35 @@ class Lifepath(HasTraits):
                 e.age = event.age
                 self.events.append(e)
                 amount_of_eps = db_mgr.relations.get_relation_count_of_age(actor_role, actor_name, e.age)
-                eps = db_mgr.relations.get_persons_related_to_event(actor_role, actor_name, e.age)
-                ep1 = None
-                ep2 = None
+                eps = list(db_mgr.relations.get_persons_related_to_event(actor_role, actor_name, e.age))
+                # ep1 = None
+                # ep2 = None
+                event_persons = []
+                for p in eps:
+                    if p.mutual_feelings is not None:
+                        tlove_person = TragicLove()
+                        tlove_person.load(p.to_person.name)
+                        tlove_person.load_relation(actor_role, actor_name, e.age, tlove_person.name)
+                        event_persons.append(tlove_person)
+                    elif p.cause is not None:
+                        enemy = Enemy()
+                        enemy.load(p.to_person.name)
+                        enemy.load_relation(actor_role, actor_name, e.age, enemy.name)
+                        event_persons.append(enemy)
+                    else:
+                        person = EventPerson()
+                        person.load(p.to_person.name)
+                        person.load_relation(actor_role, actor_name, e.age, person.name)
+                        event_persons.append(person)
+                if len(event_persons) == 1:
+                    e.person = event_persons.pop()
+                elif len(event_persons) == 2:
+                    e.two_event_persons = TwoEventPersons()
+                    e.two_event_persons.person1 = event_persons[0]
+                    e.two_event_persons.person2 = event_persons[1]
+
                 print('amount of eps on loading: ' + str(amount_of_eps))
-                if amount_of_eps == 1:
+                '''if amount_of_eps == 1:
                     ep1 = eps[0]
                     print(ep1)
                 elif amount_of_eps == 2:
@@ -785,7 +809,8 @@ class Lifepath(HasTraits):
                             e.two_event_persons.person1 = EventPerson()
                             e.two_event_persons.person2 = EventPerson()
                             e.two_event_persons.person1.load(ep1.to_person.name)
-                            e.two_event_persons.person2.load(ep2.to_person.name)
+                            e.two_event_persons.person2.load(ep2.to_person.name)'''
+
 
     view = View(
         Tabbed(

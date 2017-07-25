@@ -43,8 +43,8 @@ class Event(Model):
 
 class EventRelation(Model):
     owner = ForeignKeyField(Actor, 'owners')
-    relation = CharField
-    detail = CharField
+    relation = CharField()
+    detail = CharField()
     mutual_feelings = CharField(null=True)
     sibling_relation = CharField(null=True)
     event = ForeignKeyField(Event, 'events')
