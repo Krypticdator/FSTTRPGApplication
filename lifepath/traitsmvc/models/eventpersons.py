@@ -1,7 +1,8 @@
-from fsttrpgbasicinfo.traitmvc.models import BasicInfo, CharacterName
-from fsttrpglifepath.db import DBManager
-from fsttrpglifepath.globals import *
 from traits.api import HasTraits, String, Enum, Int, List, Instance
+
+from application.basicinfo.traitmvc.models import BasicInfo, CharacterName
+from application.lifepath.db import DBManager
+from application.lifepath.globals import *
 
 
 class Relationships(HasTraits):
@@ -87,19 +88,25 @@ class Enemy(EventPerson):
 
     def save_relation(self, actor_role, actor_name, event_age):
         db_mgr = DBManager()
-        db_mgr.enemy_relations.save_enemy_relation(actor_role, actor_name, event_age, enemy_name=self.name,
-                                                   cause=self.cause, who=self.who, who_is_mad=self.who_is_mad,
-                                                   action=self.do, resources=self.resources)
+        rel = self.get_relationship()
+        detail = self.current_relationship.detail
+        db_mgr.relations.save_event_relation(to_actor_role=actor_role, to_actor_name=actor_name, to_event_age=event_age,
+                                             relation=rel, ep_name=self.name, detail=detail, cause=self.cause,
+                                             who=self.who, who_is_mad=self.who_is_mad, action=self.do,
+                                             resources=self.resources)
 
-    def load_relation(self, owner_role, owner_name, event_age, ep_name):
+    def load_relation(self, owner_role, owner_name, age, ep_name):
         db_mgr = DBManager()
-        enemy = db_mgr.enemy_relations.get_enemy_of_owner(owner_role, owner_name, event_age)
-        self.cause = enemy.cause
-        self.who = enemy.who
-        self.who_is_mad = enemy.who_is_mad
-        self.do = enemy.action
-        self.resources = enemy.resources
-        self.name = enemy.enemytargets.name
+        r = db_mgr.relations.get_relation_to_person(owner_role=owner_role, owner_name=owner_name, age=age,
+                                                    ep_name=ep_name)
+        for rel in r:
+            self.set_relationship(rel.relation, rel.detail)
+            self.cause = rel.cause
+            self.who = rel.who
+            self.who_is_mad = rel.who_is_mad
+            self.do = rel.action
+            self.resources = rel.resources
+            self.name = rel.enemytargets.name
 
 
 class TragicLove(EventPerson):

@@ -1,9 +1,9 @@
 from random import randint
 
-from fsttrpglifepath.globals import BETRAYEL_PATTERN_1, BETRAYEL_PATTERN_2, FRND_KILLED_PATTERN_1, \
-    FRND_KILLED_PATTERN_2, FRND_KILLED_PATTERN_3, POWERFUL_CONNECTION_PATTERN
-from fsttrpglifepath.traitsmvc.models.eventpersons import make_event_person, TwoEventPersons, EventPerson
-from traits.api import HasTraits, Int, String, Button, Method, Instance, Bool
+from traits.api import Button, Method, Bool
+
+from application.lifepath.models import event_menu
+from application.lifepath.traitsmvc.models.eventpersons import *
 
 
 def handler_1_2(path):
@@ -241,25 +241,6 @@ class Event(HasTraits):
         if self.do_generate_event_persons:
             self.generate_event_persons(self.path)
 
-    view = View(
-        Tabbed(
-            Group(
-                HGroup(
-                    Item('random_event', show_label=False),
-                    Item('path', width=15),
-                ),
-                HGroup(
-                    Item('age', width=2),
-                    Item('desc', width=600, show_label=False),
-                ),
-                label='Event'),
-            HGroup(
-                Item('person', show_label=False),
-                Item('two_event_persons', show_label=False),
-                label='People involved')
-
-        )
-    )
 
 
 class Lifepath(HasTraits):
@@ -533,18 +514,3 @@ class Lifepath(HasTraits):
                             e.two_event_persons.person1.load(ep1.to_person.name)
                             e.two_event_persons.person2.load(ep2.to_person.name)
 
-    view = View(
-        Tabbed(
-            Item('events', show_label=False, editor=ListEditor(style='custom')),
-            Group(
-                Item('starting_age'),
-                Item('to_age'),
-                Item('gender'),
-                Item('sexual_orientation'),
-                Item('random_lifepath'),
-                Item('save_lifepath'),
-                label='Settings')
-
-        )
-
-    )

@@ -1,7 +1,10 @@
-from fsttrpglifepath.globals import TABLE_EVENT_MENU
-from fsttrpgtables.utilities import export_to_aws
-from traits.api import HasTraits, String, Button
-from traitsui.api import Item, VGroup, View
+from traits.api import HasTraits, String, Button, Instance
+from traitsui.api import Item, VGroup, View, Tabbed
+
+from application.lifepath.globals import TABLE_EVENT_MENU
+from application.lifepath.traitsmvc.views.family import FamilyBackgroundWithControlsView
+from application.lifepath.traitsmvc.views.lifepath import LifepathView
+from application.tables.utilities import export_to_aws
 
 
 class LifepathShortcutMaker(HasTraits):
@@ -59,3 +62,30 @@ class LifepathShortcutMaker(HasTraits):
             Item('upload', show_label=False)
         )
     )
+
+
+class ActorBackgroundWidget(HasTraits):
+    lifepath = Instance(LifepathView, ())
+    family = Instance(FamilyBackgroundWithControlsView, ())
+
+    def validate_lifepath(self, actor_gender, sexual_orientation):
+        if sexual_orientation == 'hetero':
+            pass
+
+    view = View(
+        Tabbed(
+            Item('family', style='custom', show_label=False),
+            Item('lifepath', style='custom', show_label=False)
+        )
+    )
+
+
+if __name__ == '__main__':
+    # l = LifepathShortcutMaker()
+    # l = Lifepath()
+    # l.configure_traits()
+    ab = ActorBackgroundWidget()
+    # ab.lifepath.generate_random_lifepath(16, 25)
+    # ab.lifepath.save('pc', 'toni')
+    # ab.lifepath.load('pc', 'toni')
+    ab.configure_traits()
