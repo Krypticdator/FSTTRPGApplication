@@ -785,31 +785,7 @@ class Lifepath(HasTraits):
                     e.two_event_persons.person2 = event_persons[1]
 
                 print('amount of eps on loading: ' + str(amount_of_eps))
-                '''if amount_of_eps == 1:
-                    ep1 = eps[0]
-                    print(ep1)
-                elif amount_of_eps == 2:
-                    ep1 = eps[0]
-                    ep2 = eps[1]
-                    print(ep2)
-                if amount_of_eps > 0:
-                    if PATTERN_TRAGIC_LOVE.match(e.path):
-                        e.person = TragicLove()
-                        e.person.load(actor_role, actor_name, e.age, ep1.to_person.name)
-                    elif ENEMY_PATTERN.match(e.path):
-                        e.person = Enemy()
-                        e.person.load_relation(actor_role, actor_name, e.age)
-                    else:
 
-                        if amount_of_eps == 1:
-                            e.person = EventPerson()
-                            e.person.load(ep1.to_person.name)
-                        elif amount_of_eps == 2:
-                            e.two_event_persons = TwoEventPersons()
-                            e.two_event_persons.person1 = EventPerson()
-                            e.two_event_persons.person2 = EventPerson()
-                            e.two_event_persons.person1.load(ep1.to_person.name)
-                            e.two_event_persons.person2.load(ep2.to_person.name)'''
 
 
     view = View(
