@@ -3,7 +3,7 @@ from traitsui.api import Group, Item, Tabbed, View
 
 from application.attributes.traitsmvc.views import AllAttributeListsTabbedView
 from application.basicinfo.traitmvc.views import BasicInfoTabbedView
-from application.lifepath.traitsmodels import Lifepath
+from application.lifepath.lifepathapp import ActorBackground
 from application.personality.traitsmodels import PersonalityRandomizer, personality as PERSONALITY
 from application.primarystats.traitsmodels import Stats
 
@@ -13,7 +13,7 @@ class CharacterCreatorFull(HasTraits):
     personality = Instance(PersonalityRandomizer, ())
     stats = Instance(Stats, ())
     attributes = Instance(AllAttributeListsTabbedView, ())
-    lifepath = Instance(Lifepath, ())
+    lifepath = Instance(ActorBackground, ())
     save = Button()
     load = Button()
 

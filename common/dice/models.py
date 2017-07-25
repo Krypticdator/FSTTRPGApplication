@@ -47,7 +47,7 @@ class RandomDice(object):
 
 
 if __name__ == '__main__':
-    d = RandomDice(1, 10)
+    d = RandomDice(1, 6)
     re = []
     for i in range(0, 1):
         r = d.roll()

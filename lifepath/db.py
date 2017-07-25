@@ -48,22 +48,35 @@ class EventRelation(Model):
     sibling_relation = CharField(null=True)
     event = ForeignKeyField(Event, 'events')
     to_person = ForeignKeyField(Actor, 'event targets')
+    cause = CharField(null=True)
+    who = CharField(null=True)
+    who_is_mad = CharField(null=True)
+    action = CharField(null=True)
+    resources = CharField(null=True)
 
     @staticmethod
     def save_event_relation(to_actor_role, to_actor_name, to_event_age, relation, ep_name, detail="", ep_role='NPC',
-                            mutual_feelings=None, sibling_relation=None):
+                            mutual_feelings=None, sibling_relation=None, cause=None, who=None,
+                            who_is_mad=None, action=None, resources=None):
         event = Event.get_event_of_age(actor_role=to_actor_role, actor_name=to_actor_name, age=to_event_age)
         owner = Actor.add_or_get(to_actor_role, to_actor_name)
         target = Actor.add_or_get(ep_role, ep_name)
+        relation_count = EventRelation.get_relation_count_of_age(owner_role=to_actor_role, owner_name=to_actor_name,
+                                                                 age=to_event_age)
+        if relation_count < 3:
+            relation, created = EventRelation.get_or_create(owner=owner, to_person=target, event=event,
+                                                            defaults={'relation': relation, 'detail': detail,
+                                                                      'mutual_feelings': mutual_feelings,
+                                                                      'sibling_relation': sibling_relation,
+                                                                      'cause': cause,
+                                                                      'who': who,
+                                                                      'who_is_mad': who_is_mad,
+                                                                      'action': action,
+                                                                      'resources': resources})
+            if created:
+                print('created new relation')
 
-        relation, created = EventRelation.get_or_create(owner=owner, to_person=target, event=event,
-                                                        defaults={'relation': relation, 'detail': detail,
-                                                                  'mutual_feelings': mutual_feelings,
-                                                                  'sibling_relation': sibling_relation})
-        if created:
-            print('created new relation')
-
-        return relation
+            return relation
 
     @staticmethod
     def get_relations_of_person(actor_role, actor_name):
@@ -94,52 +107,16 @@ class EventRelation(Model):
         database = lifepath_db
 
 
-class EnemyRelation(Model):
-    cause = CharField()
-    who = CharField()
-    who_is_mad = CharField()
-    action = CharField()
-    resources = CharField()
-    owner = ForeignKeyField(Actor, 'enemyowners')
-    event = ForeignKeyField(Event, 'enemyevents')
-    to_person = ForeignKeyField(Actor, 'enemytargets')
-
-    @staticmethod
-    def save_enemy_relation(to_actor_role, to_actor_name, to_event_age, enemy_name, cause, who, who_is_mad,
-                            action, resources, ep_role='NPC'):
-        event = Event.get_event_of_age(actor_role=to_actor_role, actor_name=to_actor_name, age=to_event_age)
-        owner = Actor.add_or_get(to_actor_role, to_actor_name)
-        target = Actor.add_or_get(ep_role, enemy_name)
-        enemy, created = EnemyRelation.get_or_create(event=event, owner=owner, to_person=target,
-                                                     defaults={'cause': cause,
-                                                               'who': who,
-                                                               'who_is_mad': who_is_mad,
-                                                               'action': action,
-                                                               'resources': resources})
-        if created:
-            print('created new enemy')
-
-    @staticmethod
-    def get_enemy_of_owner(owner_role, owner_name, event_age, ep_role='NPC'):
-        own = Actor.add_or_get(owner_role, owner_name)
-        event = Event.get_event_of_age(owner_role, owner_name, event_age)
-        enemy = EnemyRelation.get(EnemyRelation.owner == own, EnemyRelation.event == event)
-        return enemy
-
-    class Meta:
-        database = lifepath_db
-
 
 class DBManager(object):
     def __init__(self):
         self.actor_db_mgr = ActorDBManager()
         self.basic_info_mgr = BasicInfoDBManager()
         lifepath_db.connect()
-        lifepath_db.create_tables([Event, EventRelation, EnemyRelation], safe=True)
+        lifepath_db.create_tables([Event, EventRelation], safe=True)
 
         self.events = Event()
         self.relations = EventRelation()
-        self.enemy_relations = EnemyRelation()
 
     def __del__(self):
         if lifepath_db:
