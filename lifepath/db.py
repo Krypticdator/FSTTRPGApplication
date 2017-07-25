@@ -11,6 +11,7 @@ class Event(Model):
     age = IntegerField()
     event_chain = CharField()
 
+
     @staticmethod
     def add_event(actor_role, actor_name, age, event_chain):
         act = Actor.add_or_get(role=actor_role, name=actor_name)
@@ -58,6 +59,7 @@ class EventRelation(Model):
     def save_event_relation(to_actor_role, to_actor_name, to_event_age, relation, ep_name, detail="", ep_role='NPC',
                             mutual_feelings=None, sibling_relation=None, cause=None, who=None,
                             who_is_mad=None, action=None, resources=None):
+        # type: (str, str, int, str, str, str, str, str, str, str, str, str, str, str) -> object
         event = Event.get_event_of_age(actor_role=to_actor_role, actor_name=to_actor_name, age=to_event_age)
         owner = Actor.add_or_get(to_actor_role, to_actor_name)
         target = Actor.add_or_get(ep_role, ep_name)
@@ -112,7 +114,7 @@ class DBManager(object):
     def __init__(self):
         self.actor_db_mgr = ActorDBManager()
         self.basic_info_mgr = BasicInfoDBManager()
-        lifepath_db.connect()
+        lifepath_db.get_conn()
         lifepath_db.create_tables([Event, EventRelation], safe=True)
 
         self.events = Event()

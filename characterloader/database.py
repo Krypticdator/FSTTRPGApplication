@@ -46,7 +46,7 @@ class Actor(Model):
 class DBManager(object):
     def __init__(self, actor_db_filepath=None):
         super(DBManager, self).__init__()
-        actor_db.connect()
+        actor_db.get_conn()
         actor_db.create_tables([Actor], safe=True)
         self.actors = Actor()
 

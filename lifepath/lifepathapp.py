@@ -117,19 +117,21 @@ class Enemy(EventPerson):
 
     def save_relation(self, actor_role, actor_name, event_age):
         db_mgr = DBManager()
-        db_mgr.enemy_relations.save_enemy_relation(actor_role, actor_name, event_age, enemy_name=self.name,
-                                                   cause=self.cause, who=self.who, who_is_mad=self.who_is_mad,
-                                                   action=self.do, resources=self.resources)
+        db_mgr.relations.save_event_relation(actor_role, actor_name, event_age, relation='enemy', ep_name=self.name,
+                                             cause=self.cause,
+                                             who=self.who, who_is_mad=self.who_is_mad, action=self.do,
+                                             resources=self.resources)
 
-    def load_relation(self, owner_role, owner_name, event_age):
+    def load_relation(self, owner_role, owner_name, age, ep_name):
         db_mgr = DBManager()
-        enemy = db_mgr.enemy_relations.get_enemy_of_owner(owner_role, owner_name, event_age)
-        self.cause = enemy.cause
-        self.who = enemy.who
-        self.who_is_mad = enemy.who_is_mad
-        self.do = enemy.action
-        self.resources = enemy.resources
-        self.name = enemy.enemytargets.name
+        enemy = db_mgr.relations.get_relation_to_person(owner_role, owner_name, age, ep_name)
+        for e in enemy:
+            self.cause = e.cause
+            self.who = e.who
+            self.who_is_mad = e.who_is_mad
+            self.do = e.action
+            self.resources = e.resources
+            self.name = e.enemytargets.name
 
     view = View(
         VGroup(
@@ -744,7 +746,9 @@ class Lifepath(HasTraits):
 
     def load(self, actor_role, actor_name):
         db_mgr = DBManager()
-        events = db_mgr.events.get_all_events_of_actor(actor_role, actor_name)
+
+        # https://stackoverflow.com/questions/31815235/python-peewee-iterate-over-selectquery
+        events = list(db_mgr.events.get_all_events_of_actor(actor_role, actor_name))
         if events is not None:
             for event in events:
                 chain = event.event_chain
@@ -769,7 +773,7 @@ class Lifepath(HasTraits):
                         e.person = TragicLove()
                         e.person.load(actor_role, actor_name, e.age, ep1.to_person.name)
                     elif ENEMY_PATTERN.match(e.path):
-                        e.person = Enemy
+                        e.person = Enemy()
                         e.person.load_relation(actor_role, actor_name, e.age)
                     else:
 
@@ -1127,7 +1131,7 @@ if __name__ == '__main__':
     # l = Lifepath()
     # l.configure_traits()
     ab = ActorBackground()
-    # ab.lifepath.generate_random_lifepath(16, 25)
-    # ab.lifepath.save('pc', 'toni')
-    # ab.lifepath.load('pc', 'toni')
+    ab.lifepath.generate_random_lifepath(16, 25)
+    ab.lifepath.save('pc', 'toni')
+    ab.lifepath.load('pc', 'toni')
     ab.configure_traits()
