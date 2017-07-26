@@ -838,6 +838,13 @@ class Family(HasTraits):
         self.mother.random_age(min_age, max_age)
         self.father.random_age(min_age, max_age)
 
+    def correct_family_surname(self, surname):
+        for sibling in self.siblings:
+            sibling.set_last_name(surname)
+        self.mother.set_last_name(surname)
+        self.father.set_last_name(surname)
+
+
     def collect_family(self):
         f = []
         for sibling in self.siblings:

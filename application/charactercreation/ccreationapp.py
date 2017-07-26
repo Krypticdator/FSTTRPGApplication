@@ -21,6 +21,15 @@ class CharacterCreatorFull(HasTraits):
     def basic_info_age_changed(self):
         self.lifepath.lifepath.to_age = self.info.basic_info_view.age
 
+    # @on_trait_change('lifepath.family.family_background.family.father.name')
+    @on_trait_change('lifepath.family.all')
+    def correct_family_names_and_ages(self):
+        print('correcting')
+        age = self.info.basic_info_view.age
+        last_name = self.info.basic_info_view.get_last_name()
+        self.lifepath.family.family_background.family.correct_family_surname(last_name)
+        self.lifepath.family.family_background.family.correct_sibling_ages(age)
+
     def _save_fired(self):
         self.info.basic_info_view.save()
         name = self.info.basic_info_view.character_name.get_name()

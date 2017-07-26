@@ -48,6 +48,11 @@ class BasicInfo(HasTraits):
         new_name = array[0] + ' ' + surname
         self.character_name.set_name(new_name)
 
+    def get_last_name(self):
+        name = self.character_name.get_name()
+        array = name.split(' ')
+        return array[1]
+
     def random_age(self, random_min=2, random_max=25, use_3d6_table=False):
         if use_3d6_table:
             dice = sum([randint(1, 6), randint(1, 6), randint(1, 6)])
