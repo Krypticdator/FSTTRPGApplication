@@ -149,4 +149,5 @@ pip-selfcheck.json
 .idea/
 
 
-.db
+*.db
+*secret*
