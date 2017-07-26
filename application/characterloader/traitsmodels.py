@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from traits.api import HasTraits, Enum, String, Instance, Method, ListStr, Button, Dict, File
+from traits.api import HasTraits, Enum, String, Instance, Method, ListStr, Button, Dict
 from traitsui.api import View, Item, HGroup, ListStrEditor
 
 from database import DBManager
@@ -8,20 +8,6 @@ from models import JsonListOfActors
 
 list_of_actors = JsonListOfActors()
 
-
-class ActorDatabaseFileChooser(HasTraits):
-    file = File()
-
-    def _file_changed(self):
-        DBManager(actor_db_filepath=str(self.file))
-
-    def _file_default(self):
-        db = DBManager()
-        filelocation = db.filepaths.get_filepath('actors_location')
-        if filelocation:
-            return filelocation.filepath
-        else:
-            return ""
 
 
 class Name(HasTraits):
@@ -77,7 +63,6 @@ class CharacterName(HasTraits):
     name = Instance(Name, ())
     loader = Instance(Loader)
     name_change_handler = Method()
-    actor_db_file_location = Instance(ActorDatabaseFileChooser, ())
     save = Button()
 
     view = View(
