@@ -31,6 +31,40 @@ class DiceRoller(HasTraits):
     )
 
 
+class InfiniteDiceRoller(DiceRoller):
+    end_daemon = Button()
+    configure_daemon = Button()
+
+    def __init__(self):
+        super(InfiniteDiceRoller, self).__init__()
+        self.daemon = RandomDice(self.amount, self.dice, max_life=-1)
+
+    def _end_daemon_fired(self):
+        self.daemon.r_dice.daemon.end()
+
+    def _configure_daemon_fired(self):
+        self.daemon.r_dice.daemon.end()
+        self.daemon = RandomDice(self.amount, self.dice, max_life=-1)
+
+    def _roll_fired(self):
+        r = []
+        for i in range(0, 1):
+            r.append(self.daemon.roll())
+
+        self.result = str(r)
+
+    view = View(
+        Item('configure_daemon'),
+        Item('amount'),
+        Item('dice'),
+        Item('roll'),
+        Item('result'),
+        Item('end_daemon', show_label=False)
+    )
+
+
+
+
 if __name__ == '__main__':
-    dr = DiceRoller()
+    dr = InfiniteDiceRoller()
     dr.configure_traits()

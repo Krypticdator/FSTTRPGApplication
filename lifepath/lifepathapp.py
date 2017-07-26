@@ -515,7 +515,7 @@ class Event(HasTraits):
 
 
 class Lifepath(HasTraits):
-    starting_age = Int()
+    starting_age = Int(default_value=16)
     to_age = Int()
     random_lifepath = Button()
     save_lifepath = Button()

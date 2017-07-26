@@ -1,4 +1,4 @@
-from traits.api import HasTraits, Instance, Button
+from traits.api import HasTraits, Instance, Button, on_trait_change
 from traitsui.api import Group, Item, Tabbed, View
 
 from application.attributes.traitsmvc.views import AllAttributeListsTabbedView
@@ -16,6 +16,10 @@ class CharacterCreatorFull(HasTraits):
     lifepath = Instance(ActorBackground, ())
     save = Button()
     load = Button()
+
+    @on_trait_change('info.basic_info_view.age')
+    def basic_info_age_changed(self):
+        self.lifepath.lifepath.to_age = self.info.basic_info_view.age
 
     def _save_fired(self):
         self.info.basic_info_view.save()
